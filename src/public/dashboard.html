@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - Volcano Gym</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+  <link rel="stylesheet" href="dashboard.css">
+</head>
+
+<body>
+  <aside id="sidebar">
+    <div class="sidebar-brand">
+      <span class="logo"></span>
+      <span>Volcano Gym</span>
+    </div>
+    <div id="navMenu"></div>
+    <div class="sidebar-footer">
+      <a class="nav-item" id="btnLogout">
+        <i class="bi bi-box-arrow-left"></i><span>Cerrar sesión</span>
+      </a>
+    </div>
+  </aside>
+
+  <div id="main">
+    <div id="topbar">
+      <button class="toggle-btn" id="toggleSidebar"><i class="bi bi-list"></i></button>
+      <div class="topbar-right">
+        <span style="font-size:13px;color:#666">Bienvenido,</span>
+        <span class="user-badge" id="topbarUser">—</span>
+      </div>
+    </div>
+
+    <div id="content">
+
+      <div class="view active" id="view-home">
+        <h4 style="font-weight:700;color:#1a1a2e;margin-bottom:6px;">Dashboard</h4>
+        <p style="color:#888;font-size:14px;margin-bottom:24px;">Bienvenido al sistema de gestión</p>
+        <div class="row g-3" id="homeCards"></div>
+      </div>
+
+      <div class="view" id="view-clientes">
+        <div class="mod-header">
+          <span class="mod-title"><i class="bi bi-person-badge me-2"></i>Clientes</span>
+          <button class="btn-save" onclick="openModal('cliente')"><i class="bi bi-plus-lg me-1"></i>Nuevo
+            cliente</button>
+        </div>
+        <div class="stats-row" id="clienteStatsRow">
+          <div class="stat-pill"><span class="sp-num sp-activos" id="cl-activos">—</span> activos</div>
+          <div class="stat-pill"><span class="sp-num sp-inactivos" id="cl-inactivos">—</span> inactivos</div>
+          <div class="stat-pill"><span class="sp-num sp-mes" id="cl-mes">—</span> este mes</div>
+        </div>
+        <div class="filter-chips" id="clienteFiltros">
+          <span class="chip active" data-f="todos" onclick="filtroCliente('todos',this)">Todos</span>
+          <span class="chip" data-f="activos" onclick="filtroCliente('activos',this)">Activos</span>
+          <span class="chip" data-f="inactivos" onclick="filtroCliente('inactivos',this)">Inactivos</span>
+          <span class="chip" data-f="saldo" onclick="filtroCliente('saldo',this)">Con saldo pendiente</span>
+        </div>
+        <div class="table-card">
+          <div class="table-toolbar">
+            <input type="text" id="searchClientes" placeholder="🔍 Buscar por nombre o DNI..."
+              oninput="filtrarTabla('clientes')">
+          </div>
+          <div style="overflow-x:auto">
+            <table>
+              <thead>
+                <tr>
+                  <th>NOMBRE</th>
+                  <th>DNI</th>
+                  <th>CELULAR</th>
+                  <th>F. REGISTRO</th>
+                  <th>PLAN VIGENTE</th>
+                  <th>VENCE</th>
+                  <th>ESTADO</th>
+                  <th>TIPO</th>
+                  <th>ASESOR</th>
+                  <th>ACCIONES</th>
+                </tr>
+              </thead>
+              <tbody id="tbodyClientes">
+                <tr class="loading-row">
+                  <td colspan="10">Cargando...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="view" id="view-membresias">
+        <div class="mod-header">
+          <span class="mod-title"><i class="bi bi-card-checklist me-2"></i>Membresías</span>
+          <button class="btn-save" onclick="openModal('membresia')"><i class="bi bi-plus-lg me-1"></i>Nueva
+            membresía</button>
+        </div>
+        <p
+          style="background:#fff3cd;border-radius:8px;padding:10px 16px;font-size:13px;margin-bottom:16px;color:#856404;">
+          📌 Cláusula 5a: Las membresías se renuevan automáticamente al vencimiento. Cláusula 6a: No aplica
+          devolución de matrícula o cualquier tipo de pago.
+        </p>
+        <div style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap;align-items:center">
+          <select id="filtroMembEstado" class="form-control" style="width:180px" onchange="loadMembresias()">
+            <option value="todos">Todos los estados</option>
+            <option value="activa">Activa</option>
+            <option value="vencida">Vencida</option>
+            <option value="anulada">Anulada</option>
+            <option value="congelada">Congelada</option>
+          </select>
+          <select id="filtroMembPlan" class="form-control" style="width:180px" onchange="loadMembresias()">
+            <option value="todos">Todos los planes</option>
+          </select>
+          <input type="text" id="searchMembresias" class="form-control" style="width:220px"
+            placeholder="🔍 Buscar cliente..." oninput="filtrarMembresias()">
+        </div>
+        <div id="listadoMembresias">
+          <div style="text-align:center;padding:40px;color:#aaa">Cargando...</div>
+        </div>
+      </div>
+
+      <div class="view" id="view-planes">
+        <div class="mod-header">
+          <span class="mod-title"><i class="bi bi-grid-3x3-gap me-2"></i>Planes</span>
+          <button class="btn-save" onclick="openModal('plan')"><i class="bi bi-plus-lg me-1"></i>Nuevo plan</button>
+        </div>
+        <div class="row g-3" id="gridPlanes">
+          <div style="text-align:center;padding:40px;color:#aaa">Cargando...</div>
+        </div>
+      </div>
+
+      <div class="view" id="view-perfiles">
+        <div class="mod-header">
+          <span class="mod-title"><i class="bi bi-shield-check me-2"></i>Perfiles</span>
+          <button class="btn-save" onclick="openModal('perfil')"><i class="bi bi-plus-lg me-1"></i>Nuevo Perfil</button>
+        </div>
+        <div class="table-card">
+          <div class="table-toolbar">
+            <input type="text" id="searchPerfiles" placeholder="🔍 Buscar perfil..." oninput="filtrarTabla('perfiles')">
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Nombre</th>
+                <th>Descripción</th>
+                <th>Estado</th>
+                <th>Creado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyPerfiles">
+              <tr class="loading-row">
+                <td colspan="6">Cargando...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="view" id="view-usuarios">
+        <div class="mod-header">
+          <span class="mod-title"><i class="bi bi-people me-2"></i>Usuarios</span>
+          <button class="btn-save" onclick="openModal('usuario')"><i class="bi bi-plus-lg me-1"></i>Nuevo
+            Usuario</button>
+        </div>
+        <div class="table-card">
+          <div class="table-toolbar">
+            <input type="text" id="searchUsuarios" placeholder="🔍 Buscar usuario..."
+              oninput="filtrarTabla('usuarios')">
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Nombre</th>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Perfil</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyUsuarios">
+              <tr class="loading-row">
+                <td colspan="7">Cargando...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="view" id="view-categorias">
+        <div class="mod-header">
+          <span class="mod-title"><i class="bi bi-tag me-2"></i>Gestión de Categorías</span>
+          <button class="btn-save" onclick="nuevaCategoria()">
+            <i class="bi bi-plus-lg me-1"></i>Nueva Categoría
+          </button>
+        </div>
+        <div class="table-card">
+          <div class="table-toolbar">
+            <input type="text" id="searchCategorias" placeholder="🔍 Buscar categoría..."
+              oninput="filtrarTabla('categorias')">
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>NOMBRE</th>
+                <th>DESCRIPCIÓN</th>
+                <th>ESTADO</th>
+                <th>ACCIONES</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyCategorias">
+              <tr class="loading-row"><td colspan="5">Cargando...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="view" id="view-presentaciones">
+        <div class="mod-header">
+          <span class="mod-title"><i class="bi bi-box2 me-2"></i>Gestión de Presentaciones</span>
+          <button class="btn-save" onclick="nuevaPresentacion()">
+            <i class="bi bi-plus-lg me-1"></i>Nueva Presentación
+          </button>
+        </div>
+        <p style="background:#e8f5e9;border-radius:8px;padding:10px 16px;font-size:13px;color:#2e7d32;margin-bottom:16px">
+          📦 Las presentaciones definen el tipo de envase o formato del producto (Pote, Bolsa, Frasco…).
+          Cada presentación puede tener un precio distinto por producto.
+        </p>
+        <div class="table-card">
+          <div class="table-toolbar">
+            <input type="text" id="searchPresentaciones" placeholder="🔍 Buscar presentación..."
+              oninput="filtrarTabla('presentaciones')">
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>NOMBRE</th>
+                <th>DESCRIPCIÓN</th>
+                <th>ESTADO</th>
+                <th>ACCIONES</th>
+              </tr>
+            </thead>
+            <tbody id="tbodyPresentaciones">
+              <tr class="loading-row"><td colspan="5">Cargando...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="view" id="view-productos">
+        <div class="mod-header">
+          <span class="mod-title"><i class="bi bi-box-seam me-2"></i>Gestión de Productos</span>
+          <button class="btn-save" onclick="openModal('producto')">
+            <i class="bi bi-plus-lg me-1"></i>Nuevo Producto
+          </button>
+        </div>
+      
+        <div class="stats-row">
+          <div class="stat-pill"><span class="sp-num sp-activos"   id="prod-activos">—</span> activos</div>
+          <div class="stat-pill"><span class="sp-num sp-inactivos" id="prod-inactivos">—</span> inactivos</div>
+          <div class="stat-pill"><span class="sp-num" style="color:#e65100" id="prod-stock">—</span> stock bajo</div>
+        </div>
+      
+        <div class="filter-chips">
+          <span class="chip chip-prod active" data-fp="todos"      onclick="filtroProducto('todos',this)">Todos</span>
+          <span class="chip chip-prod"        data-fp="activos"    onclick="filtroProducto('activos',this)">Activos</span>
+          <span class="chip chip-prod"        data-fp="inactivos"  onclick="filtroProducto('inactivos',this)">Inactivos</span>
+          <span class="chip chip-prod"        data-fp="stock_bajo" onclick="filtroProducto('stock_bajo',this)">⚠ Stock bajo</span>
+        </div>
+      
+        <div class="table-card">
+          <div class="table-toolbar">
+            <input type="text" id="searchProductos" placeholder="🔍 Buscar producto o categoría..."
+              oninput="filtrarTabla('productos')">
+          </div>
+          <div style="overflow-x:auto">
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>NOMBRE</th>
+                  <th>CATEGORÍA</th>
+                  <th>PRECIO COSTO</th>
+                  <th>PRECIO VENTA</th>
+                  <th>STOCK</th>
+                  <th>UNIDAD</th>
+                  <th>ESTADO</th>
+                  <th>ACCIONES</th>
+                </tr>
+              </thead>
+              <tbody id="tbodyProductos">
+                <tr class="loading-row"><td colspan="9">Cargando...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modalCliente">
+    <div class="modal-box" style="width:520px">
+      <div class="modal-title" id="modalClienteTitle">Registrar nuevo cliente</div>
+      <p style="background:#e8f5e9;border-radius:8px;padding:8px 14px;font-size:12px;color:#2e7d32;margin-bottom:14px">
+        📌 Cláusula 1a: Si el cliente es menor de 18 años, un adulto con tenencia debe suscribir el contrato.
+      </p>
+      <div class="alert-msg" id="alertCliente"></div>
+      <input type="hidden" id="clienteId">
+      <div class="row g-2 mb-2">
+        <div class="col-6">
+          <div class="form-label">Nombres *</div>
+          <input class="form-control" id="clienteNombre" placeholder="Nombres completos">
+        </div>
+        <div class="col-6">
+          <div class="form-label">Apellidos *</div>
+          <input class="form-control" id="clienteApellido" placeholder="Apellidos">
+        </div>
+      </div>
+      <div class="row g-2 mb-2">
+        <div class="col-6">
+          <div class="form-label">DNI *</div>
+          <input class="form-control" id="clienteDni" placeholder="00000000" maxlength="15">
+        </div>
+        <div class="col-6">
+          <div class="form-label">Celular</div>
+          <input class="form-control" id="clienteTelefono" placeholder="9XXXXXXXX">
+        </div>
+      </div>
+      <div class="row g-2 mb-2">
+        <div class="col-6">
+          <div class="form-label">Fecha de nacimiento</div>
+          <input class="form-control" id="clienteFechaNac" type="date">
+        </div>
+        <div class="col-6">
+          <div class="form-label">Fecha de matrícula</div>
+          <input class="form-control" id="clienteFechaReg" type="date">
+        </div>
+      </div>
+      <div class="mb-2">
+        <div class="form-label">¿Mayor de 18 años?</div>
+        <select class="form-control" id="clienteMayorEdad">
+          <option value="si">Sí</option>
+          <option value="no">No (requiere tutor)</option>
+        </select>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" onclick="closeModal('modalCliente')">Cancelar</button>
+        <button class="btn-save" onclick="saveCliente()"><i class="bi bi-check2 me-1"></i>Registrar cliente</button>
+      </div>
+    </div>
+  </div>
+
+<!-- ════════════════════════════════════════════════════════════
+     MODAL NUEVA MEMBRESÍA  — reemplazar el bloque id="modalMembresia"
+     ════════════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="modalMembresia">
+    <div class="modal-box" style="width:580px;max-height:92vh;overflow-y:auto">
+        <div class="modal-title" id="modalMembresiaTitle">Nueva Membresía</div>
+        <div class="alert-msg" id="alertMembresia"></div>
+        <input type="hidden" id="membresiaId">
+
+        <!-- Cliente -->
+        <div class="mb-2">
+            <div class="form-label">Cliente *</div>
+            <input class="form-control" id="membClienteBuscar"
+                placeholder="Buscar por nombre o DNI..."
+                oninput="buscarClienteMemb(this.value)" autocomplete="off">
+            <div id="membClienteSugerencias" style="position:relative"></div>
+            <input type="hidden" id="membClienteId">
+            <div id="membClienteSeleccionado"
+                style="display:none;margin-top:6px;padding:8px 12px;background:#f0f7ff;border-radius:8px;font-size:13px">
+            </div>
+        </div>
+
+        <div class="row g-2 mb-2">
+            <!-- Plan -->
+            <div class="col-6">
+                <div class="form-label">Plan *</div>
+                <select class="form-control" id="membPlan" onchange="onPlanChange()">
+                    <option value="">Seleccionar plan...</option>
+                </select>
+            </div>
+            <!-- Fecha inicio -->
+            <div class="col-6">
+                <div class="form-label">F. Inicio *</div>
+                <input class="form-control" id="membFechaInicio" type="date"
+                    onchange="calcularFechaFin()">
+            </div>
+        </div>
+
+        <!-- Info del plan -->
+        <div id="membInfo"
+            style="display:none;background:#f8f9fa;border-radius:8px;padding:12px;margin-bottom:12px;font-size:13px">
+            <div class="row g-1">
+                <div class="col-4"><b>Duración:</b> <span id="mbDuracion">—</span></div>
+                <div class="col-4"><b>F. Fin:</b>   <span id="mbFin">—</span></div>
+                <div class="col-4"><b>Precio:</b>   <span id="mbPrecio">—</span></div>
+            </div>
+        </div>
+
+        <div class="row g-2 mb-2">
+            <!-- Monto total -->
+            <div class="col-6">
+                <div class="form-label">Monto total (S/) *</div>
+                <input class="form-control" id="membMonto" type="number" step="0.01"
+                    placeholder="0.00" oninput="actualizarResumenCuotas()">
+            </div>
+            <!-- Pago inicial (cuota 1) -->
+            <div class="col-6">
+                <div class="form-label">Pago inicial — cuota 1 (S/) *</div>
+                <input class="form-control" id="membPago1" type="number" step="0.01"
+                    placeholder="0.00" oninput="actualizarResumenCuotas()">
+                <div style="font-size:11px;color:#888;margin-top:3px">
+                    Lo que paga hoy. El resto se fracciona.
+                </div>
+            </div>
+        </div>
+
+        <!-- Fraccionamiento (se muestra solo si el plan lo permite) -->
+        <div id="membFraccionInfo" style="display:none" class="mb-2">
+            <div class="form-label">Número de cuotas *</div>
+            <select class="form-control" id="membNumCuotas"
+                onchange="actualizarResumenCuotas()">
+                <option value="1">Pago único</option>
+            </select>
+            <div style="font-size:11px;color:#26a69a;margin-top:3px">
+                <i class="bi bi-info-circle me-1"></i>
+                Las cuotas se generan con fechas automáticas según la configuración del plan.
+            </div>
+        </div>
+
+        <!-- Calendario de cuotas preview -->
+        <div id="membResumenCuotas"
+            style="display:none;background:#f0fff4;border:1px solid #c8e6c9;border-radius:8px;padding:12px;margin-bottom:14px;font-size:13px">
+        </div>
+
+        <div class="row g-2 mb-2">
+            <!-- Método de pago -->
+            <div class="col-6">
+                <div class="form-label">Método de pago (cuota 1) *</div>
+                <select class="form-control" id="membMetodoPago">
+                    <option value="efectivo">Efectivo</option>
+                    <option value="yape">Yape</option>
+                    <option value="plin">Plin</option>
+                    <option value="transferencia">Transferencia</option>
+                </select>
+            </div>
+            <!-- Asesor -->
+            <div class="col-6">
+                <div class="form-label">Asesor *</div>
+                <select class="form-control" id="membAsesor">
+                    <option value="">Seleccionar asesor...</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Observaciones -->
+        <div class="mb-2">
+            <div class="form-label">Observaciones</div>
+            <textarea class="form-control" id="membObservaciones" rows="2"
+                placeholder="Notas adicionales (opcional)"></textarea>
+        </div>
+
+        <div class="modal-footer">
+            <button class="btn-cancel" onclick="closeModal('modalMembresia')">Cancelar</button>
+            <button class="btn-save" onclick="saveMembresia()">
+                <i class="bi bi-check2 me-1"></i>Registrar membresía
+            </button>
+        </div>
+    </div>
+</div>
+
+
+<!-- ════════════════════════════════════════════════════════════
+     MODAL PLAN  — reemplazar el bloque id="modalPlan"
+     ════════════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="modalPlan">
+    <div class="modal-box" style="max-height:90vh;overflow-y:auto">
+        <div class="modal-title" id="modalPlanTitle">Nuevo Plan</div>
+        <div class="alert-msg" id="alertPlan"></div>
+        <input type="hidden" id="planId">
+
+        <div class="mb-2">
+            <div class="form-label">Nombre del plan *</div>
+            <input class="form-control" id="planNombre" placeholder="Ej: Clásico 3 meses">
+        </div>
+
+        <div class="row g-2 mb-2">
+            <div class="col-6">
+                <div class="form-label">Tipo de cliente *</div>
+                <select class="form-control" id="planTipo">
+                    <option value="nuevo">Nuevo</option>
+                    <option value="renovacion">Renovación</option>
+                    <option value="interdiario">Interdiario</option>
+                </select>
+            </div>
+            <div class="col-6">
+                <div class="form-label">Duración (meses) *</div>
+                <input class="form-control" id="planDuracion" type="number" min="1" placeholder="1">
+            </div>
+        </div>
+
+        <div class="row g-2 mb-2">
+            <div class="col-6">
+                <div class="form-label">Precio (S/) *</div>
+                <input class="form-control" id="planPrecio" type="number" step="0.01" placeholder="0.00">
+            </div>
+            <div class="col-6">
+                <div class="form-label">Estado</div>
+                <select class="form-control" id="planActivo">
+                    <option value="true">Activo</option>
+                    <option value="false">Inactivo</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="mb-2">
+            <div class="form-label">Descripción</div>
+            <textarea class="form-control" id="planDesc" rows="2"
+                placeholder="Descripción del plan..."></textarea>
+        </div>
+
+        <!-- Toggle fraccionamiento -->
+        <div class="mb-2" style="padding:10px;background:#f8f9fa;border-radius:8px">
+            <div class="d-flex align-items-center gap-2">
+                <input type="checkbox" id="planFraccion" onchange="toggleFraccion()"
+                    style="width:16px;height:16px">
+                <label for="planFraccion" class="form-label mb-0" style="cursor:pointer;font-weight:600">
+                    <i class="bi bi-credit-card-2-front me-1" style="color:#26a69a"></i>
+                    ¿Permite fraccionamiento de pago?
+                </label>
+            </div>
+
+            <!-- Opciones de fraccionamiento (ocultas si no está marcado) -->
+            <div id="planFraccionOpts" style="display:none;margin-top:12px">
+                <div class="row g-2 mb-2">
+                    <div class="col-4">
+                        <div class="form-label">Máx. cuotas</div>
+                        <input class="form-control" id="planMaxCuotas" type="number"
+                            min="2" max="24" value="2">
+                        <div style="font-size:10px;color:#888;margin-top:2px">
+                            Ej: 2 = dos cuotas
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="form-label">Días entre cuotas</div>
+                        <input class="form-control" id="planDiasEntre" type="number"
+                            min="1" value="30">
+                        <div style="font-size:10px;color:#888;margin-top:2px">
+                            Ej: 30 = mensual
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="form-label">Días límite pago</div>
+                        <input class="form-control" id="planDiasLimite" type="number"
+                            min="1" value="20">
+                        <div style="font-size:10px;color:#888;margin-top:2px">
+                            Margen antes de mora
+                        </div>
+                    </div>
+                </div>
+                <div class="col-12 mb-1">
+                    <div class="form-label">Monto mínimo por cuota (S/)</div>
+                    <input class="form-control" id="planMontoMin" type="number"
+                        step="0.01" min="0" value="0" placeholder="0.00">
+                    <div style="font-size:10px;color:#888;margin-top:2px">
+                        Deja en 0 para sin mínimo
+                    </div>
+                </div>
+                <div style="background:#e8f5e9;border-radius:6px;padding:8px 10px;font-size:11px;color:#2e7d32;margin-top:6px">
+                    <i class="bi bi-info-circle me-1"></i>
+                    Ejemplo: 2 cuotas · 30 días entre cuotas · 20 días límite
+                    → cuota 1 hoy, cuota 2 programada día 30 con vencimiento día 50.
+                </div>
+            </div>
+        </div>
+
+        <div class="modal-footer">
+            <button class="btn-cancel" onclick="closeModal('modalPlan')">Cancelar</button>
+            <button class="btn-save" onclick="savePlan()">Guardar plan</button>
+        </div>
+    </div>
+</div>
+
+  <div class="modal-overlay" id="modalMembEstado">
+    <div class="modal-box" style="width:380px">
+      <div class="modal-title">Actualizar Estado</div>
+      <div class="alert-msg" id="alertMembEstado"></div>
+      <input type="hidden" id="membEstadoId">
+      <div class="mb-3">
+        <div class="form-label">Estado de la membresía</div>
+        <select class="form-control" id="membEstadoVal">
+          <option value="activa">Activa</option>
+          <option value="vencida">Vencida</option>
+          <option value="anulada">Anulada</option>
+          <option value="congelada">Congelada</option>
+        </select>
+      </div>
+      <div class="mb-3" id="membSaldoUpdateGroup" style="display:none">
+        <div class="form-label">Saldo pendiente (S/)</div>
+        <input class="form-control" id="membSaldoUpdate" type="number" step="0.01" value="0">
+      </div>
+      <div class="mb-2">
+        <div class="form-label">Observaciones</div>
+        <textarea class="form-control" id="membObsUpdate" rows="2"></textarea>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" onclick="closeModal('modalMembEstado')">Cancelar</button>
+        <button class="btn-save" onclick="saveMembEstado()">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modalPerfil">
+    <div class="modal-box">
+      <div class="modal-title" id="modalPerfilTitle">Nuevo Perfil</div>
+      <div class="alert-msg" id="alertPerfil"></div>
+      <input type="hidden" id="perfilId">
+      <div class="mb-3">
+        <div class="form-label">Nombre *</div><input class="form-control" id="perfilNombre"
+          placeholder="Ej: Recepcionista">
+      </div>
+      <div class="mb-3">
+        <div class="form-label">Descripción</div><textarea class="form-control" id="perfilDesc" rows="2"></textarea>
+      </div>
+      <div class="mb-3" id="perfilEstadoGroup" style="display:none">
+        <div class="form-label">Estado</div>
+        <select class="form-control" id="perfilEstado">
+          <option value="1">Activo</option>
+          <option value="0">Inactivo</option>
+        </select>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" onclick="closeModal('modalPerfil')">Cancelar</button>
+        <button class="btn-save" onclick="savePerfil()">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modalPermisos">
+    <div class="modal-box" style="width:520px">
+      <div class="modal-title"><i class="bi bi-key me-2" style="color:#7c4dff"></i>Asignar Permisos — <span
+          id="permisoPerfilNombre" style="color:#7c4dff"></span></div>
+      <div class="alert-msg" id="alertPermisos"></div>
+      <input type="hidden" id="permisoPerfilId">
+      <div class="perm-header">
+        <span id="permisoCount">0 opciones seleccionadas</span>
+        <span class="perm-toggle" onclick="toggleTodosPermisos()">Seleccionar / Deseleccionar todo</span>
+      </div>
+      <div class="permisos-list" id="permisosLista">
+        <div style="text-align:center;padding:20px;color:#aaa">Cargando...</div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" onclick="closeModal('modalPermisos')">Cerrar</button>
+        <button class="btn-purple" onclick="savePermisos()"><i class="bi bi-check2 me-1"></i>Guardar Cambios</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modalUsuario">
+    <div class="modal-box">
+      <div class="modal-title" id="modalUsuarioTitle">Nuevo Usuario</div>
+      <div class="alert-msg" id="alertUsuario"></div>
+      <input type="hidden" id="usuarioId">
+      <div class="row g-2 mb-2">
+        <div class="col-6">
+          <div class="form-label">Nombre *</div><input class="form-control" id="usuarioNombre">
+        </div>
+        <div class="col-6">
+          <div class="form-label">Apellido *</div><input class="form-control" id="usuarioApellido">
+        </div>
+      </div>
+      <div class="mb-2">
+        <div class="form-label">Username *</div><input class="form-control" id="usuarioUsername">
+      </div>
+      <div class="mb-2">
+        <div class="form-label">Email *</div><input class="form-control" id="usuarioEmail" type="email">
+      </div>
+      <div class="mb-2" id="passGroup">
+        <div class="form-label">Contraseña <span id="passLabel">(requerida)</span></div>
+        <input class="form-control" id="usuarioPassword" type="password">
+      </div>
+      <div class="mb-2">
+        <div class="form-label">Perfil *</div><select class="form-control" id="usuarioPerfil"></select>
+      </div>
+      <div class="mb-2">
+        <div class="form-label">Alias Asesor</div><input class="form-control" id="usuarioAlias"
+          placeholder="Alias corto visible en el sistema">
+      </div>
+      <div class="mb-2" id="usuarioEstadoGroup" style="display:none">
+        <div class="form-label">Estado</div>
+        <select class="form-control" id="usuarioEstado">
+          <option value="1">Activo</option>
+          <option value="0">Inactivo</option>
+        </select>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" onclick="closeModal('modalUsuario')">Cancelar</button>
+        <button class="btn-save" onclick="saveUsuario()">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modalCategoria">
+    <div class="modal-box" style="width:480px">
+      <div class="modal-title" id="modalCategoriaTitle">Nueva Categoría</div>
+      <div class="alert-msg" id="alertCategoria"></div>
+      <input type="hidden" id="categoriaId">
+      <div class="mb-3">
+        <div class="form-label">Nombre *</div>
+        <input class="form-control" id="categoriaNombre" placeholder="Ej: Medicinas">
+      </div>
+      <div class="mb-3">
+        <div class="form-label">Descripción</div>
+        <textarea class="form-control" id="categoriaDescripcion" rows="3"
+          placeholder="Descripción de la categoría..."></textarea>
+      </div>
+      <div class="mb-3" id="categoriaEstadoGroup" style="display:none">
+        <div class="form-label">Estado</div>
+        <select class="form-control" id="categoriaEstado">
+          <option value="1">Activo</option>
+          <option value="0">Inactivo</option>
+        </select>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" onclick="closeModal('modalCategoria')">Cancelar</button>
+        <button class="btn-save" onclick="saveCategoria()">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modalPresentacion">
+    <div class="modal-box" style="width:480px">
+      <div class="modal-title" id="modalPresentacionTitle">Nueva Presentación</div>
+      <div class="alert-msg" id="alertPresentacion"></div>
+      <input type="hidden" id="presentacionId">
+      <div class="mb-3">
+        <div class="form-label">Nombre *</div>
+        <input class="form-control" id="presentacionNombre" placeholder="Ej: Pote, Blíster, Caja x 30">
+      </div>
+      <div class="mb-3">
+        <div class="form-label">Descripción</div>
+        <textarea class="form-control" id="presentacionDescripcion" rows="2"
+          placeholder="Descripción opcional..."></textarea>
+      </div>
+      <div class="mb-3" id="presentacionEstadoGroup" style="display:none">
+        <div class="form-label">Estado</div>
+        <select class="form-control" id="presentacionEstado">
+          <option value="1">Activo</option>
+          <option value="0">Inactivo</option>
+        </select>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" onclick="closeModal('modalPresentacion')">Cancelar</button>
+        <button class="btn-save" onclick="savePresentacion()">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modalProducto">
+    <div class="modal-box" style="width:580px;max-height:90vh">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <div class="modal-title" id="modalProductoTitle" style="margin-bottom:0">Nuevo Producto</div>
+        <button onclick="closeModal('modalProducto')"
+          style="background:none;border:none;font-size:20px;cursor:pointer;color:#888">✕</button>
+      </div>
+  
+      <div style="display:flex;gap:0;border-bottom:2px solid #eee;margin-bottom:18px">
+        <button id="tabBtn-datos"
+          class="tab-active"
+          onclick="activarTabProducto('datos')"
+          style="padding:9px 20px;border:none;background:none;cursor:pointer;font-weight:600;font-size:13px;border-bottom:2px solid transparent;transition:all .15s">
+          <i class="bi bi-clipboard-data me-1"></i>Datos Generales
+        </button>
+        <button id="tabBtn-presentaciones-producto"
+          id="tabPresentacionesProducto"
+          onclick="activarTabProducto('presentaciones-producto')"
+          style="padding:9px 20px;border:none;background:none;cursor:pointer;font-weight:600;font-size:13px;border-bottom:2px solid transparent;transition:all .15s;display:none">
+          <i class="bi bi-box2 me-1"></i>Presentaciones y Precios
+        </button>
+      </div>
+  
+      <div class="alert-msg" id="alertProducto"></div>
+      <input type="hidden" id="productoId">
+      <input type="hidden" id="ppProductoId">
+  
+      <div id="tabPane-datos">
+        <div class="mb-2">
+          <div class="form-label">Categoría *</div>
+          <select class="form-control" id="productoCategoriaSelect">
+            <option value="">Seleccionar categoría...</option>
+          </select>
+        </div>
+        <div class="mb-2">
+          <div class="form-label">Nombre del producto *</div>
+          <input class="form-control" id="productoNombre" placeholder="Ej: Creatine 500 g">
+        </div>
+        <div class="mb-2">
+          <div class="form-label">Descripción</div>
+          <textarea class="form-control" id="productoDescripcion" rows="2"
+            placeholder="Descripción opcional..."></textarea>
+        </div>
+        <div class="row g-2 mb-2">
+          <div class="col-6">
+            <div class="form-label">Precio Costo (S/)</div>
+            <input class="form-control" id="productoPrecioCosto" type="number" step="0.01" placeholder="0.00">
+          </div>
+          <div class="col-6">
+            <div class="form-label">Precio Venta (S/) *</div>
+            <input class="form-control" id="productoPrecioVenta" type="number" step="0.01" placeholder="0.00">
+          </div>
+        </div>
+        <div class="row g-2 mb-2">
+          <div class="col-4">
+            <div class="form-label">Stock actual</div>
+            <input class="form-control" id="productoStock" type="number" min="0" value="0">
+          </div>
+          <div class="col-4">
+            <div class="form-label">Stock mínimo</div>
+            <input class="form-control" id="productoStockMin" type="number" min="0" value="3">
+          </div>
+          <div class="col-4">
+            <div class="form-label">Unidad</div>
+            <select class="form-control" id="productoUnidad">
+              <option value="unidad">Unidad</option>
+              <option value="caja">Caja</option>
+              <option value="frasco">Frasco</option>
+              <option value="blister">Blíster</option>
+              <option value="sobre">Sobre</option>
+              <option value="ampolla">Ampolla</option>
+              <option value="tubo">Tubo</option>
+              <option value="litro">Litro</option>
+              <option value="kg">Kg</option>
+            </select>
+          </div>
+        </div>
+        <div class="mb-2" id="productoEstadoGroup" style="display:none">
+          <div class="form-label">Estado</div>
+          <select class="form-control" id="productoEstado">
+            <option value="1">Activo</option>
+            <option value="0">Inactivo</option>
+          </select>
+        </div>
+        <div class="modal-footer">
+          <button class="btn-cancel" onclick="closeModal('modalProducto')">Cancelar</button>
+          <button class="btn-save" onclick="saveProducto()">
+            <i class="bi bi-check2 me-1"></i>Guardar producto
+          </button>
+        </div>
+      </div><div id="tabPane-presentaciones-producto" style="display:none">
+        <p style="font-size:13px;color:#666;margin-bottom:14px">
+          Agrega las presentaciones disponibles para este producto con sus respectivos precios.
+        </p>
+        <div class="alert-msg" id="alertPreciosPresentacion"></div>
+  
+        <div id="ppListado" style="margin-bottom:18px;border-radius:10px;overflow:hidden;border:1px solid #eee">
+          <div style="text-align:center;padding:20px;color:#bbb">Sin presentaciones aún</div>
+        </div>
+  
+        <div style="background:#f8f9fa;border-radius:10px;padding:14px">
+          <div style="font-weight:700;font-size:13px;color:#1a1a2e;margin-bottom:10px">
+            <i class="bi bi-plus-circle me-1" style="color:#26a69a"></i>Agregar nueva presentación
+          </div>
+          <div class="row g-2">
+            <div class="col-5">
+              <div class="form-label">Presentación</div>
+              <select class="form-control" id="ppPresentacionSelect">
+                <option value="">-- Seleccionar --</option>
+              </select>
+            </div>
+            <div class="col-3">
+              <div class="form-label">Precio Costo (S/)</div>
+              <input class="form-control" id="ppNuevoCosto" type="number" step="0.01" placeholder="0.00">
+            </div>
+            <div class="col-3">
+              <div class="form-label">Precio Venta (S/) *</div>
+              <input class="form-control" id="ppNuevoVenta" type="number" step="0.01" placeholder="0.00">
+            </div>
+            <div class="col-1 d-flex align-items-end">
+              <button class="btn-save" onclick="agregarPresentacionProducto()"
+                style="padding:9px 12px;white-space:nowrap">
+                <i class="bi bi-plus-lg"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+  
+        <div class="modal-footer" style="margin-top:16px">
+          <button class="btn-cancel" onclick="closeModal('modalProducto')">Cerrar</button>
+        </div>
+      </div></div>
+  </div>
+
+  <div class="modal-overlay" id="modalConfirm">
+    <div class="modal-box" style="width:360px">
+      <div class="modal-title">⚠️ Confirmar acción</div>
+      <p style="color:#555;font-size:14px" id="confirmMsg">¿Estás seguro?</p>
+      <div class="modal-footer">
+        <button class="btn-cancel" onclick="closeModal('modalConfirm')">Cancelar</button>
+        <button class="btn-save" style="background:#c62828" id="confirmBtn">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/dashboard-core.js"></script>
+  <script src="js/clientes.js"></script>
+  <script src="js/membresias.js"></script>
+  <script src="js/planes.js"></script>
+  <script src="js/perfiles.js"></script>
+  <script src="js/usuarios.js"></script>
+  <script src="js/categorias.js"></script>
+  <script src="js/presentaciones.js"></script>
+  <script src="js/productos.js"></script>
+</body>
+
+</html>
